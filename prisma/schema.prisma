@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  phone     String
+  createdAt DateTime  @default(now())
+  products  Product[]
+  orders    Order[] // <-- add this back-relation
+  License   License[]
+}
+
+model Product {
+  id           String      @id @default(uuid())
+  title        String
+  description  String?
+  priceCents   Int
+  cloudinaryId String
+  filename     String?
+  logoId       String?
+  logoUrl      String?
+  thumbnailId  String?
+  thumbnailUrl String?
+  createdAt    DateTime    @default(now())
+  createdById  String?
+  createdBy    User?       @relation(fields: [createdById], references: [id])
+  isPublished  Boolean     @default(false)
+  OrderItem    OrderItem[]
+  License      License[]
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  totalCents    Int
+  paymentStatus String
+  paymentMethod String
+  address       String
+  createdAt     DateTime    @default(now())
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id])
+  productId    String?
+  product      Product? @relation(fields: [productId], references: [id])
+  title        String
+  quantity     Int
+  priceCents   Int
+  downloadLink String?
+  licenseKey   String? 
+  logoUrl String? 
+}
+
+model License {
+  id        String    @id @default(uuid())
+  key       String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  productId String
+  product   Product   @relation(fields: [productId], references: [id])
+  isActive  Boolean   @default(true)
+  domain    String?   // <-- Track which domain/site is using the license
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+}
+

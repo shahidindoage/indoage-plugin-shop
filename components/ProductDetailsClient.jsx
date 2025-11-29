@@ -1,0 +1,72 @@
+"use client";
+
+import { useCart } from "@/contexts/CartContext";
+import { useState } from "react";
+import { FaUser, FaChartBar, FaWordpressSimple } from "react-icons/fa";
+
+export default function ProductDetailsClient({ product }) {
+  const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      title: product.title,
+      price: product.priceCents,
+      quantity,
+      cloudinaryId: product.cloudinaryId,
+      filename: product.filename,
+      logoUrl: product.logoUrl,
+    });
+    alert("Added to cart!");
+  };
+
+  return (
+    <div className="page">
+      <div className="container">
+        {/* Thumbnail */}
+        {product.thumbnailUrl ? (
+          <img src={product.thumbnailUrl} alt={`${product.title} Thumbnail`} className="thumbnail" />
+        ) : (
+          <div className="thumbnail-placeholder">No Thumbnail</div>
+        )}
+
+        {/* Logo + Title */}
+        <div className="header-shop-details">
+          {product.logoUrl && <img src={product.logoUrl} className="logo" alt={`${product.title} Logo`} />}
+          <h1 className="title-1">{product.title}</h1>
+        </div>
+
+        <p className="desc1">{product.description || "No description available."}</p>
+
+        {/* Extra info */}
+        <div className="extra">
+          <div className="row author">
+            <FaUser className="icon blue" />
+            <span>Author: IndoAge</span>
+          </div>
+          <div className="row stats">
+            <div className="stat">
+              <FaChartBar className="icon green" />
+              <span>Active Installations: {100 + Math.floor(Math.random() * 900)}+</span>
+            </div>
+            <div className="stat">
+              <FaWordpressSimple className="icon black" />
+              <span>Tested with WordPress 6+</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Price + Add to Cart */}
+        <div className="price">Price: ₹{product.priceCents}</div>
+        <div className="buttons">
+          <button className="cart" onClick={handleAddToCart}>Add to Cart</button>
+        </div>
+      </div>
+
+      <style jsx>{`
+      
+      `}</style>
+    </div>
+  );
+}
