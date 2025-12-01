@@ -1,15 +1,18 @@
 "use client";
 
 import { useCart } from "@/contexts/CartContext";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaUser, FaChartBar, FaWordpressSimple } from "react-icons/fa";
+import ReactMarkdown from "react-markdown";
 
 export default function ProductDetailsClient({ product }) {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const router=useRouter()
 
   const handleAddToCart = () => {
-    addToCart({
+    const added = addToCart({
       id: product.id,
       title: product.title,
       price: product.priceCents,
@@ -18,7 +21,8 @@ export default function ProductDetailsClient({ product }) {
       filename: product.filename,
       logoUrl: product.logoUrl,
     });
-    alert("Added to cart!");
+   alert(added ? "Added to cart!" : "Already in cart!");
+    router.push('/checkout')
   };
 
   return (
@@ -37,7 +41,13 @@ export default function ProductDetailsClient({ product }) {
           <h1 className="title-1">{product.title}</h1>
         </div>
 
-        <p className="desc1">{product.description || "No description available."}</p>
+       <div className="desc1">
+          {product.description ? (
+            <ReactMarkdown>{product.description}</ReactMarkdown>
+          ) : (
+            "No description available."
+          )}
+        </div>
 
         {/* Extra info */}
         <div className="extra">
@@ -59,8 +69,8 @@ export default function ProductDetailsClient({ product }) {
 
         {/* Price + Add to Cart */}
         <div className="price">Price: ₹{product.priceCents}</div>
-        <div className="buttons">
-          <button className="cart" onClick={handleAddToCart}>Add to Cart</button>
+        <div className="buttons" style={{width:'26%'}}>
+          <button className="cart" onClick={handleAddToCart} style={{paddingTop:"13px",paddingBottom:"13px",fontFamily:"Montserrat",fontSize:'16px'}}>Add to Cart</button>
         </div>
       </div>
 

@@ -2,23 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 export default function NewProduct() {
+  const router = useRouter();
+
   const [pluginData, setPluginData] = useState(null);
   const [logoData, setLogoData] = useState(null);
   const [thumbnailData, setThumbnailData] = useState(null);
-const router = useRouter();
+
   const [uploadingPlugin, setUploadingPlugin] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
 
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [description, setDescription] = useState(""); // Markdown input
 
   const uploadFile = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Set uploading states
     if (type === "plugin") setUploadingPlugin(true);
     else if (type === "logo") setUploadingLogo(true);
     else if (type === "thumbnail") setUploadingThumbnail(true);
@@ -27,16 +29,21 @@ const router = useRouter();
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch(`/api/upload?type=${type}`, {
+      const route =
+        type === "plugin"
+          ? "/api/upload-plugin"
+          : type === "logo"
+          ? "/api/upload-logo"
+          : "/api/upload-thumbnail";
+
+      const res = await fetch(route, {
         method: "POST",
         body: formData,
       });
 
       const data = await res.json();
-
       if (data.error) throw new Error(data.error);
 
-      // Store uploaded file info
       if (type === "plugin") setPluginData(data);
       else if (type === "logo") setLogoData(data);
       else if (type === "thumbnail") setThumbnailData(data);
@@ -46,7 +53,6 @@ const router = useRouter();
       if (type === "plugin") setUploadingPlugin(false);
       else if (type === "logo") setUploadingLogo(false);
       else if (type === "thumbnail") setUploadingThumbnail(false);
-      setUploadProgress(0);
     }
   };
 
@@ -61,12 +67,12 @@ const router = useRouter();
     const form = new FormData(e.target);
 
     try {
-      const res = await fetch("/api/products/create", {
+      const res = await fetch("/api/admin/products/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: form.get("title"),
-          description: form.get("description"),
+          description, // send markdown
           priceCents: Number(form.get("price")),
           cloudinaryId: pluginData.public_id,
           filename: pluginData.filename,
@@ -78,15 +84,15 @@ const router = useRouter();
       });
 
       const data = await res.json();
-
       if (data.error) throw new Error(data.error);
 
       alert("✅ Product created successfully!");
       e.target.reset();
-      router.push("/admin/products")
       setPluginData(null);
       setLogoData(null);
       setThumbnailData(null);
+      setDescription("");
+      router.push("/admin/products");
     } catch (err) {
       alert(`Error creating product: ${err.message}`);
     }
@@ -100,8 +106,19 @@ const router = useRouter();
         <input name="title" placeholder="Title" required />
         <br /><br />
 
-        <textarea name="description" placeholder="Description" />
-        <br /><br />
+        {/* Markdown Description */}
+        <label>Description (Markdown supported)</label>
+        <textarea
+          name="description"
+          placeholder="Write your description in Markdown"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <br />
+        <div style={{ border: "1px solid #ccc", padding: 10, marginBottom: 20 }}>
+          <strong>Preview:</strong>
+          <ReactMarkdown>{description}</ReactMarkdown>
+        </div>
 
         <input type="number" name="price" placeholder="Price (cents)" required />
         <br /><br />
@@ -129,12 +146,7 @@ const router = useRouter();
 
         <button
           type="submit"
-          disabled={
-            !pluginData ||
-            uploadingPlugin ||
-            uploadingLogo ||
-            uploadingThumbnail
-          }
+          disabled={uploadingPlugin || uploadingLogo || uploadingThumbnail}
         >
           Create Product
         </button>

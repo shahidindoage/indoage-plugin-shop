@@ -91,7 +91,7 @@ export default function ShopPage() {
 
             <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
               <a
-                href={`/admin/products/${p.id}`}
+                href={`/admin/products/${p.id}/edit`}
                 style={{
                   flex: 1,
                   padding: "8px 12px",
@@ -102,7 +102,7 @@ export default function ShopPage() {
                   textAlign: "center",
                 }}
               >
-                View
+                Edit
               </a>
 
               <button

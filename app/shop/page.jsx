@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { FaUser, FaChartBar, FaWordpressSimple, FaSearch } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 export default function ShopPage() {
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const router=useRouter()
 
   useEffect(() => {
     async function fetchProducts() {
@@ -36,6 +38,7 @@ export default function ShopPage() {
       logoUrl: product.logoUrl,
     });
     alert(added ? "Added to cart!" : "Already in cart!");
+    router.push('/checkout')
   };
 
   return (
